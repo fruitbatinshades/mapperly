@@ -20,6 +20,11 @@ public record MapperConfiguration
     public PropertyNameMappingStrategy? PropertyNameMappingStrategy { get; init; }
 
     /// <summary>
+    /// Lambda run on the target name if the default one returns null
+    /// </summary>
+    public Func<string, string> PropertyNameProcess { get; init; }
+
+    /// <summary>
     /// The default enum mapping strategy.
     /// Can be overwritten on specific enums via mapping method configurations.
     /// </summary>

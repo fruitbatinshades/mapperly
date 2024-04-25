@@ -24,6 +24,7 @@ public static class ObjectMemberMappingBodyBuilder
     public static void BuildMappingBody(IMembersContainerBuilderContext<IMemberAssignmentTypeMapping> ctx)
     {
         var ignoreCase = ctx.BuilderContext.Configuration.Mapper.PropertyNameMappingStrategy == PropertyNameMappingStrategy.CaseInsensitive;
+        var propertyProcessor = ctx.BuilderContext.Configuration.Mapper.PropertyNameProcess;
 
         foreach (var targetMember in ctx.TargetMembers.Values)
         {
@@ -46,6 +47,7 @@ public static class ObjectMemberMappingBodyBuilder
                     MemberPathCandidateBuilder.BuildMemberPathCandidates(targetMember.Name),
                     ctx.IgnoredSourceMemberNames,
                     ignoreCase,
+                    propertyProcessor,
                     out var sourceMemberPath
                 )
             )

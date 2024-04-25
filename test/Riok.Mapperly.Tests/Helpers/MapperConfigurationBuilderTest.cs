@@ -8,7 +8,7 @@ public class MapperConfigurationBuilderTest
     [Fact]
     public void ShouldMergeMapperConfigurations()
     {
-        var ignoredProperties = new HashSet<string> { "TypeId" };
+        var ignoredProperties = new HashSet<string> { "TypeId", "PropertyNameProcess" };
         var properties = typeof(MapperConfiguration).GetProperties();
 
         var mapperConfiguration = new MapperConfiguration();
@@ -36,6 +36,7 @@ public class MapperConfigurationBuilderTest
         var mapperConfiguration = NewMapperConfiguration();
         var mapper = MapperConfigurationMerger.Merge(mapperConfiguration, new());
         mapper.PropertyNameMappingStrategy.Should().Be(PropertyNameMappingStrategy.CaseSensitive);
+        mapper.PropertyNameProcess.Should().Be(null);
         mapper.EnumMappingStrategy.Should().Be(EnumMappingStrategy.ByName);
         mapper.EnumMappingIgnoreCase.Should().BeTrue();
         mapper.ThrowOnMappingNullMismatch.Should().BeTrue();

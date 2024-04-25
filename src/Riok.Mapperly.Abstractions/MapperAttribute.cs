@@ -16,6 +16,11 @@ public class MapperAttribute : Attribute
     public PropertyNameMappingStrategy PropertyNameMappingStrategy { get; set; } = PropertyNameMappingStrategy.CaseSensitive;
 
     /// <summary>
+    /// If normal matching did not find a match, change the property name via this method
+    /// </summary>
+    public Func<string, string> PropertyNameProcess { get; set; }
+
+    /// <summary>
     /// The default enum mapping strategy.
     /// Can be overwritten on specific enums via mapping method configurations.
     /// </summary>

@@ -199,6 +199,7 @@ public class SymbolAccessor(CompilationContext compilationContext, INamedTypeSym
         IEnumerable<IEnumerable<string>> pathCandidates,
         IReadOnlyCollection<string> ignoredNames,
         bool ignoreCase,
+        Func<string, string> propertyNamePreProcess,
         [NotNullWhen(true)] out MemberPath? memberPath
     )
     {
@@ -207,7 +208,7 @@ public class SymbolAccessor(CompilationContext compilationContext, INamedTypeSym
         {
             // reuse List instead of allocating a new one
             foundPath.Clear();
-            if (!TryFindPath(type, pathCandidate, ignoreCase, foundPath))
+            if (!TryFindPath(type, pathCandidate, ignoreCase, propertyNamePreProcess, foundPath))
                 continue;
 
             if (ignoredNames.Contains(foundPath[0].Name))
@@ -224,7 +225,7 @@ public class SymbolAccessor(CompilationContext compilationContext, INamedTypeSym
     internal bool TryFindMemberPath(ITypeSymbol type, IReadOnlyCollection<string> path, [NotNullWhen(true)] out MemberPath? memberPath)
     {
         var foundPath = new List<IMappableMember>();
-        if (TryFindPath(type, path, false, foundPath))
+        if (TryFindPath(type, path, false, null, foundPath))
         {
             memberPath = new(foundPath);
             return true;
@@ -234,13 +235,19 @@ public class SymbolAccessor(CompilationContext compilationContext, INamedTypeSym
         return false;
     }
 
-    private bool TryFindPath(ITypeSymbol type, IEnumerable<string> path, bool ignoreCase, ICollection<IMappableMember> foundPath)
+    private bool TryFindPath(
+        ITypeSymbol type,
+        IEnumerable<string> path,
+        bool ignoreCase,
+        Func<string, string> propertyNamePreProcess,
+        ICollection<IMappableMember> foundPath
+    )
     {
         foreach (var name in path)
         {
             // get T if type is Nullable<T>, prevents Value being treated as a member
             var actualType = type.NonNullableValueType() ?? type;
-            if (GetMappableMember(actualType, name, ignoreCase) is not { } member)
+            if (GetMappableMember(actualType, name, ignoreCase, propertyNamePreProcess) is not { } member)
                 return false;
 
             type = member.Type;
@@ -250,7 +257,12 @@ public class SymbolAccessor(CompilationContext compilationContext, INamedTypeSym
         return true;
     }
 
-    private IMappableMember? GetMappableMember(ITypeSymbol symbol, string name, bool ignoreCase)
+    private IMappableMember? GetMappableMember(
+        ITypeSymbol symbol,
+        string name,
+        bool ignoreCase,
+        Func<string, string> propertyNamePreProcess
+    )
     {
         var membersBySymbol = ignoreCase ? _allAccessibleMembersCaseInsensitive : _allAccessibleMembersCaseSensitive;
 
@@ -261,7 +273,8 @@ public class SymbolAccessor(CompilationContext compilationContext, INamedTypeSym
         membersBySymbol[symbol] = symbolMembers = GetAllAccessibleMappableMembers(symbol)
             .GroupBy(x => x.Name, comparer)
             .ToDictionary(x => x.Key, x => x.First(), comparer);
-        return symbolMembers.GetValueOrDefault(name);
+        return symbolMembers.GetValueOrDefault(name)
+            ?? (propertyNamePreProcess is not null ? symbolMembers.GetValueOrDefault(propertyNamePreProcess(name)) : null);
     }
 
     private ImmutableArray<AttributeData> GetAttributesCore(ISymbol symbol)

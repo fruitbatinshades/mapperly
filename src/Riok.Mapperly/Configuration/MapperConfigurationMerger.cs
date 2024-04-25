@@ -12,6 +12,9 @@ public static class MapperConfigurationMerger
             ?? defaultMapperConfiguration.PropertyNameMappingStrategy
             ?? mapper.PropertyNameMappingStrategy;
 
+        mapper.PropertyNameProcess =
+            mapperConfiguration.PropertyNameProcess ?? defaultMapperConfiguration.PropertyNameProcess ?? mapper.PropertyNameProcess;
+
         mapper.EnumMappingStrategy =
             mapperConfiguration.EnumMappingStrategy ?? defaultMapperConfiguration.EnumMappingStrategy ?? mapper.EnumMappingStrategy;
 

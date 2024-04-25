@@ -178,6 +178,7 @@ public static class NewValueTupleMappingBodyBuilder
                 MemberPathCandidateBuilder.BuildMemberPathCandidates(field.Name),
                 ctx.IgnoredSourceMemberNames,
                 ignoreCase,
+                null,
                 out sourcePath
             )
         )
